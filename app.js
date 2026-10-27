@@ -18,6 +18,14 @@ function loadTasks() {
   tasks = SAMPLE_TASKS.concat(saved);
 }
 
+// 이 PC 시계 기준 오늘 날짜를 YYYY-MM-DD 로 표시
+function showToday() {
+  const d = new Date();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  document.getElementById('todayBox').textContent = d.getFullYear() + '-' + mm + '-' + dd;
+}
+
 function weatherText(w) {
   return w ? w.tempMax + '℃ · ' + w.windMax + 'm/s · ' + w.rainProb + '%' : '-';
 }
@@ -60,5 +68,6 @@ function addTask(e) {
 }
 
 document.getElementById('taskForm').addEventListener('submit', addTask);
+showToday();
 loadTasks();
 renderTasks();
