@@ -14,7 +14,7 @@
 - logic.js   : 판단 규칙만 (화면을 다루는 코드 금지)
 - app.js     : 화면 동작 (목록 그리기, 일정 추가)
 - config.js  : Supabase 연결 정보 두 줄 (주소 · 공개용 키)
-- api/KIM.js : 일정 · 날씨 · 판단을 JSON 으로 돌려주는 Vercel 서버 함수 (판단은 logic.js 를 가져다 씀)
+- api/kma.js : 일정 · 날씨 · 판단을 JSON 으로 돌려주는 Vercel 서버 함수 (판단은 logic.js 를 가져다 씀)
 - setup.sql  : wx_tasks 표 만들기 (Supabase SQL Editor 에서 직접 실행)
 - data/tasks.json : 기본 일정 목록 (가상 데이터, 참고용 · 앱은 읽지 않음)
 - PRD.md · CLAUDE.md · README.md : 문서
@@ -24,7 +24,7 @@
 - 표 만들기와 값 규칙(지역 · 구분)은 setup.sql 에 두고, DB 에서도 막는다. 실행은 내가 SQL Editor 에서 한다.
 - 연결 정보는 config.js 두 줄(주소 · 공개용 anon 키)만 쓴다. service_role 같은 비밀 키는 코드 · 채팅 · GitHub 어디에도 넣지 않는다.
 - 외부 스크립트는 supabase-js 하나만 쓴다. (버전을 정확히 지정)
-- api/KIM.js 의 접근 키는 Vercel 환경변수 KIM_KEY 로만 읽고, 코드 · 채팅 · GitHub 에 적지 않는다.
+- api/kma.js 의 접근 키는 Vercel 환경변수 KMA_KEY 로만 읽고, 코드 · 채팅 · GitHub 에 적지 않는다.
 - 일정을 못 읽으면 '배포주소로 열어주세요'를 화면에 보여 주고, 목록 대신 이 문구만 보인다.
 
 ## 작업 방식

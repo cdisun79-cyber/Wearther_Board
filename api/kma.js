@@ -1,5 +1,5 @@
-// api/KIM.js – GET /api/KIM?region=대전 : 그 지역의 일정 · 날씨 · 판단을 JSON 으로 돌려줌
-// 접근 키는 Vercel 환경변수 KIM_KEY (코드에 적지 않음). 호출할 때 헤더 x-kim-key 로 보낸다.
+// api/kma.js – GET /api/kma?region=대전 : 그 지역의 일정 · 날씨 · 판단을 JSON 으로 돌려줌
+// 접근 키는 Vercel 환경변수 KMA_KEY (코드에 적지 않음). 호출할 때 헤더 x-kma-key 로 보낸다.
 
 const crypto = require('crypto');
 const { REGIONS, judge, buildWeatherUrl, parseWeather } = require('../logic.js');
@@ -22,9 +22,9 @@ function sameKey(sent, expected) {
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') return send(res, 405, { error: 'GET 만 지원합니다' });
 
-  const expected = process.env.KIM_KEY;
+  const expected = process.env.KMA_KEY;
   if (!expected) return send(res, 500, { error: '서버 설정 오류' });
-  if (!sameKey(req.headers['x-kim-key'], expected)) return send(res, 401, { error: '접근 키가 올바르지 않습니다' });
+  if (!sameKey(req.headers['x-kma-key'], expected)) return send(res, 401, { error: '접근 키가 올바르지 않습니다' });
 
   const region = req.query && req.query.region;
   if (!region || !Object.prototype.hasOwnProperty.call(REGIONS, region)) {
