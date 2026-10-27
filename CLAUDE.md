@@ -6,7 +6,7 @@
 
 ## 기술 스택 (변경 금지)
 - HTML + CSS + 순수 JavaScript만 사용한다. (React 등 프레임워크, 빌드 도구 사용 금지)
-- index.html 을 더블클릭해서 열 수 있어야 한다.
+- 배포 주소 또는 로컬 서버(예: VS Code Live Server)로 index.html 을 열 수 있어야 한다. (더블클릭으로는 일정 파일을 읽지 못함)
 
 ## 폴더 구조
 - index.html : 화면 구조
