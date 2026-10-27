@@ -13,14 +13,17 @@
 - style.css  : 디자인
 - logic.js   : 판단 규칙만 (화면을 다루는 코드 금지)
 - app.js     : 화면 동작 (목록 그리기, 일정 추가)
-- data/tasks.json : 기본 일정 목록 (가상 데이터)
+- config.js  : Supabase 연결 정보 두 줄 (주소 · 공개용 키)
+- setup.sql  : wx_tasks 표 만들기 (Supabase SQL Editor 에서 직접 실행)
+- data/tasks.json : 기본 일정 목록 (가상 데이터, 참고용 · 앱은 읽지 않음)
 - PRD.md · CLAUDE.md · README.md : 문서
 
-## 데이터 읽기 규칙
-- 기본 일정 목록은 data/tasks.json 에만 두고, 코드 안에 직접 쓰지 않는다.
-- app.js 는 브라우저 저장보다 data/tasks.json 을 먼저 읽는다.
-- 화면에서 추가한 일정만 브라우저(localStorage)에 따로 저장한다.
-- 더블클릭(file://)으로 열어 JSON 을 읽지 못하면 '배포주소로 열어주세요'를 화면에 보여 준다.
+## 데이터 규칙 (Supabase)
+- 일정은 Supabase 표 wx_tasks 에서 읽고, 추가한 일정도 같은 표에 저장한다. 코드 안에 일정 목록을 직접 쓰지 않는다.
+- 표 만들기와 값 규칙(지역 · 구분)은 setup.sql 에 두고, DB 에서도 막는다. 실행은 내가 SQL Editor 에서 한다.
+- 연결 정보는 config.js 두 줄(주소 · 공개용 anon 키)만 쓴다. service_role 같은 비밀 키는 코드 · 채팅 · GitHub 어디에도 넣지 않는다.
+- 외부 스크립트는 supabase-js 하나만 쓴다. (버전을 정확히 지정)
+- 일정을 못 읽으면 '배포주소로 열어주세요'를 화면에 보여 주고, 목록 대신 이 문구만 보인다.
 
 ## 작업 방식
 1. 코드를 고치기 전에 계획(수정할 파일과 이유)을 먼저 보여 주고 승인을 받는다.

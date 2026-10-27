@@ -1,19 +1,25 @@
 // app.js – 화면 동작 (목록 그리기, 일정 추가)
 
 let tasks = [];
-let tasksLoadFailed = false;   // data/tasks.json 을 못 읽었을 때 (더블클릭으로 연 경우 등)
+let tasksLoadFailed = false;   // Supabase 에서 일정을 못 읽었을 때
 let weatherByRegion = {};   // 03 단원에서 지역별 날씨를 넣음
 const windTest = new URLSearchParams(location.search).get('test') === 'wind';   // 주소 끝 ?test=wind
 
-// data/tasks.json 을 먼저 읽고, 화면에서 추가한 일정(wx_added)을 그 뒤에 붙임
+// 연결 정보는 config.js (주소 · 공개용 키). 없거나 틀리면 db 는 null 이고 목록은 못 읽음
+let db = null;
+try {
+  db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} catch (err) {
+  db = null;
+}
+
+// Supabase 표 wx_tasks 에서 일정을 id 순서로 읽음
 async function loadTasks() {
   try {
-    const res = await fetch('data/tasks.json');
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const base = await res.json();
-    if (!Array.isArray(base)) throw new Error('일정 파일 모양이 다릅니다');
-    const saved = JSON.parse(localStorage.getItem('wx_added') || '[]');
-    tasks = base.concat(saved);
+    if (!db) throw new Error('연결 정보가 없습니다');
+    const { data, error } = await db.from('wx_tasks').select('title, region, kind, owner').order('id');
+    if (error) throw error;
+    tasks = data;
     tasksLoadFailed = false;
   } catch (err) {
     tasks = [];
@@ -96,9 +102,13 @@ async function addTask(e) {
     owner: document.getElementById('ownerInput').value.trim(),
   };
   if (!t.title || !t.owner) return;
-  const saved = JSON.parse(localStorage.getItem('wx_added') || '[]');
-  saved.push(t);
-  localStorage.setItem('wx_added', JSON.stringify(saved));
+  const msg = document.getElementById('msgBox');
+  const { error } = db ? await db.from('wx_tasks').insert(t) : { error: true };
+  if (error) {
+    msg.textContent = '일정을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+    return;
+  }
+  msg.textContent = '';
   e.target.reset();
   await loadTasks();
   renderTasks();
