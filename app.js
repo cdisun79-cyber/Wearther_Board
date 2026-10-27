@@ -3,6 +3,7 @@
 let tasks = [];
 let tasksLoadFailed = false;   // data/tasks.json 을 못 읽었을 때 (더블클릭으로 연 경우 등)
 let weatherByRegion = {};   // 03 단원에서 지역별 날씨를 넣음
+const windTest = new URLSearchParams(location.search).get('test') === 'wind';   // 주소 끝 ?test=wind
 
 // data/tasks.json 을 먼저 읽고, 화면에서 추가한 일정(wx_added)을 그 뒤에 붙임
 async function loadTasks() {
@@ -20,12 +21,36 @@ async function loadTasks() {
   }
 }
 
-// 이 PC 시계 기준 오늘 날짜를 YYYY-MM-DD 로 표시
-function showToday() {
+// 이 PC 시계 기준 오늘 날짜 YYYY-MM-DD
+function todayText() {
   const d = new Date();
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   const dd = String(d.getDate()).padStart(2, '0');
-  document.getElementById('todayBox').textContent = d.getFullYear() + '-' + mm + '-' + dd;
+  return d.getFullYear() + '-' + mm + '-' + dd;
+}
+
+function showToday() {
+  document.getElementById('todayBox').textContent = todayText();
+}
+
+// 지금 표를 마크다운 파일로 내려받기 (일정을 못 읽은 상태면 아무것도 만들지 않음)
+function saveMarkdown() {
+  if (tasksLoadFailed) return;
+  const rows = tasks.map(t => {
+    const w = weatherByRegion[t.region];
+    return { title: t.title, region: t.region, kind: t.kind, owner: t.owner,
+             weather: weatherText(w), judge: judge(t.kind, w).text };
+  });
+  const dateText = todayText();
+  const blob = new Blob([buildMarkdown(dateText, rows, windTest)], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = mdFileName(dateText);
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 function weatherText(w) {
@@ -80,10 +105,10 @@ async function addTask(e) {
 }
 
 document.getElementById('taskForm').addEventListener('submit', addTask);
+document.getElementById('saveMdBtn').addEventListener('click', saveMarkdown);
 // 지역별 날씨를 받아 weatherBox 에 보여 주고 목록을 다시 그림 (실패해도 목록은 그대로)
 async function loadWeather() {
   const box = document.getElementById('weatherBox');
-  const windTest = new URLSearchParams(location.search).get('test') === 'wind';
   try {
     const res = await fetch(buildWeatherUrl());
     if (!res.ok) throw new Error('HTTP ' + res.status);
