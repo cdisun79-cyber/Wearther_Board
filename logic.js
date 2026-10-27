@@ -13,4 +13,47 @@ function judge(kind, w) {
   return { level: 'ok', text: '진행' };
 }
 
-if (typeof module !== 'undefined') module.exports = { RULES, judge };
+// 지역별 좌표 (공개 지리 정보, 도시 중심 부근)
+const REGIONS = {
+  '세종': { lat: 36.48, lon: 127.29 },
+  '대전': { lat: 36.35, lon: 127.38 },
+  '태안': { lat: 36.75, lon: 126.30 },
+  '보령': { lat: 36.33, lon: 126.61 },
+};
+
+// Open-Meteo 주소 만들기 : 4곳을 한 번에, 오늘 하루, 풍속은 m/s
+function buildWeatherUrl() {
+  const names = Object.keys(REGIONS);
+  const lat = names.map(n => REGIONS[n].lat).join(',');
+  const lon = names.map(n => REGIONS[n].lon).join(',');
+  return 'https://api.open-meteo.com/v1/forecast'
+    + '?latitude=' + lat + '&longitude=' + lon
+    + '&daily=temperature_2m_max,wind_speed_10m_max,precipitation_probability_max'
+    + '&wind_speed_unit=ms&timezone=Asia%2FSeoul&forecast_days=1';
+}
+
+// 응답 해석 : { 세종: { tempMax, windMax, rainProb }, … } (모양이 이상하면 오류)
+function parseWeather(data) {
+  const list = Array.isArray(data) ? data : [data];
+  const names = Object.keys(REGIONS);
+  if (list.length !== names.length) throw new Error('날씨 응답 모양이 다릅니다');
+  const result = {};
+  names.forEach((name, i) => {
+    const d = list[i] && list[i].daily;
+    const tempMax = d && d.temperature_2m_max && d.temperature_2m_max[0];
+    const windMax = d && d.wind_speed_10m_max && d.wind_speed_10m_max[0];
+    const rainProb = d && d.precipitation_probability_max && d.precipitation_probability_max[0];
+    if (![tempMax, windMax, rainProb].every(Number.isFinite)) throw new Error('날씨 값이 없습니다');
+    result[name] = { tempMax, windMax, rainProb };
+  });
+  return result;
+}
+
+// 시험용 : 모든 지역의 최대 풍속을 바꿈
+function applyWindTest(weather, wind) {
+  const result = {};
+  for (const name of Object.keys(weather)) result[name] = { ...weather[name], windMax: wind };
+  return result;
+}
+
+if (typeof module !== 'undefined') module.exports = { RULES, REGIONS, judge, buildWeatherUrl, parseWeather, applyWindTest };

@@ -68,6 +68,26 @@ function addTask(e) {
 }
 
 document.getElementById('taskForm').addEventListener('submit', addTask);
+// 지역별 날씨를 받아 weatherBox 에 보여 주고 목록을 다시 그림 (실패해도 목록은 그대로)
+async function loadWeather() {
+  const box = document.getElementById('weatherBox');
+  const windTest = new URLSearchParams(location.search).get('test') === 'wind';
+  try {
+    const res = await fetch(buildWeatherUrl());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    let weather = parseWeather(await res.json());
+    if (windTest) weather = applyWindTest(weather, 12);
+    weatherByRegion = weather;
+    const lines = Object.keys(weather).map(name => name + ' ' + weatherText(weather[name]));
+    box.textContent = (windTest ? '[시험 모드: 풍속 12 m/s] ' : '') + '오늘 날씨 – ' + lines.join(' / ');
+  } catch (err) {
+    weatherByRegion = {};
+    box.textContent = '날씨를 불러오지 못했습니다. 일정 목록은 그대로 볼 수 있습니다.';
+  }
+  renderTasks();
+}
+
 showToday();
 loadTasks();
 renderTasks();
+loadWeather();
